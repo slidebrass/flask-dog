@@ -3,22 +3,22 @@ import secrets
 from flask import request, jsonify, json
 import decimal
 
-from models import Dog
+from models import User
 
 def token_required(flask_func):
     @wraps(flask_func)
     def decorated(*args, **kwargs):
         token = None
 
-        if 'x-api-key' in request.headers:
-            token = request.headers['x-api-key']
+        if 'x-access-token' in request.headers:
+            token = request.headers['x-access-token'].split(' ')[1]
         if not token:
             return jsonify({'message': 'Token is missing.'}), 401
         
         try:
-            current_token = Dog.query.filter_by(token = token)
+            current_token = User.query.filter_by(token = token)
         except:
-            owner = Dog.query.token.filter_by(token = token)
+            owner = User.query.filter_by(token = token)
 
             if token != owner.token and secrets.compare_digest(token, owner.token):
                 return jsonify({'message': 'Token is invalid'})
