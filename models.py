@@ -33,6 +33,8 @@ users_schema = User(UserSchema(many=True))
 class BreedInfo(db.Model):
     __tablename__ = 'breedinfo'
     breed_id = db.Column(db.String(36), primary_key=True)
+    __tablename__ = 'breedinfo'
+    breed_id = db.Column(db.String(36), primary_key=True)
     breed_name = db.Column(db.String(100))
     breed_group = db.Column(db.String(100))
     life_span = db.Column(db.String(100))
