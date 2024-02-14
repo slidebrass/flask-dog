@@ -8,7 +8,7 @@ db = SQLAlchemy()
 
 # Establish class User to allow users to save favorite breeds to a table linked to their account
 class User(db.Model):
-    id = db.Column(db.String, primary_key=True)
+    id = db.Column(db.String(36), primary_key=True)
     breedNotes_Id = db.Column(db.String, db.ForeignKey('breednotes.breedNotes_Id'), nullable=False)
     token = db.Column(db.String, default='', unique=True)
 
@@ -33,7 +33,8 @@ users_schema = User(UserSchema(many=True))
 
 # creating a class to store breed information gathered from the Dog API
 class BreedInfo(db.Model):
-    breed_id = db.Column(db.Integer, primary_key=True)
+    __tablename__ = 'breedinfo'
+    breed_id = db.Column(db.String(36), primary_key=True)
     breed_name = db.Column(db.String(100))
     breed_group = db.Column(db.String(100))
     life_span = db.Column(db.String(100))
@@ -72,9 +73,10 @@ breeds_info_schema = BreedInfoSchema(many=True)
 # Establish class to allow users to write notes about their favorite breeds that 
 # will show up when they look at their favorites
 class BreedNotes(db.Model):
-    breedNotes_Id = db.Column(db.String, primary_key=True)
+    __tablename__ = 'breednotes'
+    breedNotes_Id = db.Column(db.String(36), primary_key=True)
     notes = db.Column(db.String(500))
-    breed_id = db.Column(db.Integer, db.ForeignKey('BreedInfo.breed_id'), nullable=False, default='')
+    breed_id = db.Column(db.String(36), db.ForeignKey('breedinfo.breed_id'), nullable=False)
     user_token = db.Column(db.String, db.ForeignKey('user.token'), nullable=False)
 
     # setting unique id for breedNotes
