@@ -33,8 +33,6 @@ users_schema = User(UserSchema(many=True))
 class BreedInfo(db.Model):
     __tablename__ = 'breedinfo'
     breed_id = db.Column(db.String(36), primary_key=True)
-    __tablename__ = 'breedinfo'
-    breed_id = db.Column(db.String(36), primary_key=True)
     breed_name = db.Column(db.String(100))
     breed_group = db.Column(db.String(100))
     life_span = db.Column(db.String(100))
@@ -97,3 +95,27 @@ class BreedNotesSchema(ma.Schema):
 
 breed_notes_schema = BreedNotesSchema()
 breeds_notes_schema = BreedNotesSchema(many=True)
+
+# Establish a class that stores breed_names and the breed_id provided by TheDogApi.
+class DogApiDict(db.Model):
+    __tablename__ = 'dogapidict'
+    dict_id = db.Column(db.String, primary_key=True)
+    dict_breed_name = db.Column(db.String)
+    dict_breed_id = db.Column(db.Integer)
+    user_token = db.Column(db.String, db.ForeignKey('user.token'), nullable=False)
+
+    def __init__(self, dict_id, dict_breed_name, dict_breed_id, user_token):
+        self.dict_id = self.set_id()
+        self.dict_breed_name = dict_breed_name
+        self.dict_breed_id = dict_breed_id
+        self.user_token = user_token
+    
+    def set_id(self):
+        return str(uuid.uuid4())
+
+class DictSchema(ma.Schema):
+    class Meta:
+        fields = ['dict_id', 'dict_breed_name', 'dict_breed_id']
+
+dict_schema = DictSchema()
+dicts_schema = DictSchema(many=True)

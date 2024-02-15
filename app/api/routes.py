@@ -1,6 +1,8 @@
 from flask import Blueprint, request, jsonify, render_template
 from helpers import token_required
-from models import db, User, user_schema, users_schema, BreedNotes, breed_notes_schema, breeds_notes_schema, BreedInfo, breed_info_schema, breeds_info_schema
+from models import db, User, user_schema, users_schema, BreedNotes, breed_notes_schema
+from models import breeds_notes_schema, BreedInfo, breed_info_schema, breeds_info_schema
+from models import DogApiDict, dict_schema, dicts_schema
 
 api = Blueprint('api',__name__, url_prefix='/api')
 
@@ -10,10 +12,9 @@ api = Blueprint('api',__name__, url_prefix='/api')
 # to save user information and favorite breeds
 def create_user(current_user_token):
     id = request.json['id']
-    breedNotes_Id = request.json['breedNotes_Id']
     user_token = current_user_token.token
 
-    user = User(id, breedNotes_Id, user_token = user_token)
+    user = User(id, user_token = user_token)
 
     db.session.add(user)
     db.session.commit()
@@ -41,7 +42,6 @@ def get_user(current_user_token, id):
 @token_required
 def update_user(current_user_token, id):
     user = User.query.get(id)
-    user.breedNotes_Id = request.json['breedNotes_Id']
     user.user_token = current_user_token.token
 
     db.session.commit()
@@ -92,7 +92,7 @@ def get_note(current_user_token, breedNotes_Id):
 
 @api.route('/notes/<breedNotes_Id>', methods = ['PUT'])
 @token_required
-def update_notes(current_user_token, breed_notes_Id):
+def update_notes(current_user_token, breedNotes_Id):
     breed_notes = BreedNotes.query.get(breedNotes_Id)
     breed_notes.notes = request.json['notes']
     breed_notes.breed_id = request.json['breed_id']
@@ -158,4 +158,57 @@ def delete_dog(current_user_token, breed_id):
     db.session.delete(dog)
     db.session.commit()
     response = breed_info_schema.dump(dog)
+    return jsonify(response)
+
+# Dog Api Dict routes
+@api.route('/dogdict', methods = ['POST'])
+@token_required
+def create_dogdict(current_token):
+    dict_id = request.json['dict_id']
+    dict_breed_name = request.json['dict_breed_name']
+    dict_breed_id = request.json['dict_breed_id']
+    token = current_token.token
+
+    dog_dict = DogApiDict(dict_id, dict_breed_name, dict_breed_id, token)
+
+    db.session.add(dog_dict)
+    db.session.commit()
+
+    response = dict_schema.dump(dog_dict)
+    return jsonify(response)
+
+@api.route('/dogdict', methods = ['GET'])
+@token_required
+def get_dogdicts(current_user_token):
+    a_user = current_user_token.token
+    dog_dict = DogApiDict.query.get(user_token = a_user).all()
+    response = dicts_schema.dump(dog_dict)
+    return jsonify(response)
+
+@api.route('/dogdict/<dict_id>', methods = ['GET'])
+@token_required
+def get_dogdict(current_user_token, dict_id):
+    dog_dict = DogApiDict.query.get(dict_id)
+    response = dict_schema.dump(dog_dict)
+    return jsonify(response)
+
+@api.route('/dogdict/<dict_id>', methods = ['PUT'])
+@token_required
+def update_dog_dict(current_user_token, dict_id):
+    dog_dict = DogApiDict.query.get(dict_id)
+    dog_dict.dict_breed_name = request.json['dict_breed_name']
+    dog_dict.dict_breed_id = request.json['dict_breed_id']
+    dog_dict.user_token = current_user_token.token
+
+    db.session.commit()
+    response = dict_schema.dump(dog_dict)
+    return jsonify(response)
+
+@api.route('/dogdict/<dict_id>', methods = ['DELETE'])
+@token_required
+def delete_dogdict(current_user_token, dict_id):
+    dog_dict = DogApiDict.query.get(dict_id)
+    db.session.delete(dog_dict)
+    db.session.commit()
+    response = dict_schema.dump(dog_dict)
     return jsonify(response)
