@@ -49,6 +49,15 @@ def upgrade():
     sa.ForeignKeyConstraint(['user_token'], ['user.token'], ),
     sa.PrimaryKeyConstraint('breedNotes_Id')
     )
+
+    op.create_table('dogapidict',
+    sa.Column('dict_id', sa.String(), nullable=False),
+    sa.Column('dict_breed_name', sa.String(), nullable=True),
+    sa.Column('dict_breed_id', sa.Integer(), nullable=True),
+    sa.Column('user_token', sa.String(), nullable=False),
+    sa.ForeignKeyConstraint(['user_token'], ['user.token'], ),
+    sa.PrimaryKeyConstraint('dict_id')
+    )
     # ### end Alembic commands ###
 
 
