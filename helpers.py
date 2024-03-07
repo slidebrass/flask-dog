@@ -16,9 +16,11 @@ def token_required(flask_func):
             return jsonify({'message': 'Token is missing.'}), 401
         
         try:
-            current_token = User.query.filter_by(token = token)
+            current_token = User.query.filter_by(token = token).first()
+            print(token)
+            print(current_token)
         except:
-            owner = User.query.filter_by(token = token)
+            owner = User.query.filter_by(token = token).first()
 
             if token != owner.token and secrets.compare_digest(token, owner.token):
                 return jsonify({'message': 'Token is invalid'})

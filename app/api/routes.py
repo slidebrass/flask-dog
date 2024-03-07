@@ -3,6 +3,7 @@ from helpers import token_required
 from models import db, User, user_schema, users_schema, BreedNotes, breed_notes_schema
 from models import breeds_notes_schema, BreedInfo, breed_info_schema, breeds_info_schema
 from models import DogApiDict, dict_schema, dicts_schema
+from sqlalchemy.sql import text
 
 api = Blueprint('api',__name__, url_prefix='/api')
 
@@ -11,10 +12,14 @@ api = Blueprint('api',__name__, url_prefix='/api')
 @token_required
 # to save user information and favorite breeds
 def create_user(current_user_token):
-    id = request.json['id']
-    user_token = current_user_token.token
+    first_name = request.json['first_name']
+    last_name = request.json['last_name']
+    email = request.json['email']
+    token = current_user_token.token
 
-    user = User(id, user_token = user_token)
+    print(f'BIG TESTER: {current_user_token.token}')
+
+    user = User(first_name, last_name, email, token = token)
 
     db.session.add(user)
     db.session.commit()
@@ -25,15 +30,14 @@ def create_user(current_user_token):
 @api.route('/users', methods = ['GET'])
 @token_required
 def get_users(current_user_token):
-    a_user = current_user_token.token
-    users = User.query.filter_by(user_token = a_user).all()
+    users = User.query.filter_by(token = current_user_token.token).all()
     response = users_schema.dump(users)
     return jsonify(response)
 
 @api.route('/users/<id>', methods = ['GET'])
 @token_required
 def get_user(current_user_token, id):
-    a_user = current_user_token.token
+    # a_user = current_user_token.token
     user = User.query.get(id)
     response = user_schema.dump(user)
     return jsonify(response)
@@ -42,7 +46,7 @@ def get_user(current_user_token, id):
 @token_required
 def update_user(current_user_token, id):
     user = User.query.get(id)
-    user.user_token = current_user_token.token
+    token = current_user_token.token
 
     db.session.commit()
     response = user_schema.dump(user)
@@ -50,9 +54,9 @@ def update_user(current_user_token, id):
 
 @api.route('/users/<id>', methods = ['DELETE'])
 @token_required
-def delete_user(current_user_token, id):
+def delete_user(token, id):
     user = User.query.get(id)
-    db.session.delte(user)
+    db.session.delete(user)
     db.session.commit()
     response = user_schema.dump(user)
     return jsonify(response)
@@ -62,12 +66,12 @@ def delete_user(current_user_token, id):
 @token_required
 # to create and save notes to a user's account
 def create_note(current_user_token):
-    breedNotes_Id = request.json['breedNotes_Id']
     notes = request.json['notes']
-    breed_id = request.json['breed_id']
+    id = request.json['id']
+    breed_info_id = request.json['breed_info_id']
     user_token = current_user_token.token
 
-    breed_notes = BreedNotes(breedNotes_Id, notes, breed_id, user_token = user_token)
+    breed_notes = BreedNotes(notes, id, breed_info_id, current_token = user_token)
 
     db.session.add(breed_notes)
     db.session.commit()
@@ -78,8 +82,7 @@ def create_note(current_user_token):
 @api.route('/notes', methods = ['GET'])
 @token_required
 def get_notes(current_user_token):
-    a_user = current_user_token.token
-    breed_notes = BreedNotes.query.get(user_token = a_user).all()
+    breed_notes = BreedNotes.query.filter_by(user_token = current_user_token.token).all()
     response = breeds_notes_schema.dump(breed_notes)
     return jsonify(response)
 
@@ -95,7 +98,8 @@ def get_note(current_user_token, breedNotes_Id):
 def update_notes(current_user_token, breedNotes_Id):
     breed_notes = BreedNotes.query.get(breedNotes_Id)
     breed_notes.notes = request.json['notes']
-    breed_notes.breed_id = request.json['breed_id']
+    breed_notes.id = request.json['id']
+    breed_notes.breed_info_id = request.json['breed_info_id']
     breed_notes.user_token = current_user_token.token
 
     db.session.commit()
@@ -112,10 +116,10 @@ def delete_notes(current_user_token, breedNotes_Id):
     return jsonify(response)
 
 # Breed Info Routes
-@api.route('/dogs', methods = ['POST'])
+@api.route('/info', methods = ['POST'])
 @token_required
 # information to come from 3rd party API call
-def create_breed_info(current_token):
+def create_breed_info(current_user_token):
     breed_id = request.json['breed_id']
     breed_name = request.json['breed_name']
     breed_group = request.json['breed_group']
@@ -124,12 +128,12 @@ def create_breed_info(current_token):
     height = request.json['height']
     bred_for = request.json['bred_for']
     temperament = request.json['temperament']
-    reference_iamge_id = request.json['reference_image_id']
-    token = current_token.token
+    reference_image_id = request.json['reference_image_id']
+    user_token = current_user_token.token
 
-    # print(f'BIG TESTER: {current_token.token}')
+    # print(f'BIG TESTER: {current_user_token.token}')
 
-    dog = BreedInfo(breed_id, breed_name, breed_group, life_span, weight, height, bred_for, temperament, reference_iamge_id, token = token)
+    dog = BreedInfo(breed_id, breed_name, breed_group, life_span, weight, height, bred_for, temperament, reference_image_id, user_token = user_token)
 
     db.session.add(dog)
     db.session.commit()
@@ -137,24 +141,24 @@ def create_breed_info(current_token):
     response = breed_info_schema.dump(dog)
     return jsonify(response)
 
-@api.route('/dogs', methods = ['GET'])
+@api.route('/info', methods = ['GET'])
 @token_required
-def get_dogs(current_token):
-    dogs = BreedInfo.query.filter_by(current_token.token).all()
+def get_breeds_info(current_user_token):
+    dogs = BreedInfo.query.filter_by(user_token = current_user_token.token).all()
     response = breeds_info_schema.dump(dogs)
     return jsonify(response)
 
-@api.route('/dogs/<breed_id>', methods = ['GET'])
+@api.route('/info/<breed_info_id>', methods = ['GET'])
 @token_required
-def get_dog(current_user_token, breed_id):
-    dog = BreedInfo.query.get(breed_id)
+def get_breed_info(current_user_token, breed_info_id):
+    dog = BreedInfo.query.get(breed_info_id)
     response = breed_info_schema.dump(dog)
     return jsonify(response)
 
-@api.route('/dogs/<breed_id>', methods = ['DELETE'])
+@api.route('/info/<breed_info_id>', methods = ['DELETE'])
 @token_required
-def delete_dog(current_user_token, breed_id):
-    dog = BreedInfo.query.get(breed_id)
+def delete_breed_info(current_user_token, breed_info_id):
+    dog = BreedInfo.query.get(breed_info_id)
     db.session.delete(dog)
     db.session.commit()
     response = breed_info_schema.dump(dog)
@@ -178,23 +182,24 @@ def create_dogdict(current_token):
     return jsonify(response)
 
 @api.route('/dogdict', methods = ['GET'])
-@token_required
-def get_dogdicts(current_user_token):
-    a_user = current_user_token.token
-    dog_dict = DogApiDict.query.get(user_token = a_user).all()
+def get_dogdicts():
+    dog_dict = DogApiDict.query.filter_by().all()
     response = dicts_schema.dump(dog_dict)
     return jsonify(response)
 
-@api.route('/dogdict/<dict_id>', methods = ['GET'])
+@api.route('/dogdict/<breed_name>', methods = ['GET'])
 @token_required
-def get_dogdict(current_user_token, dict_id):
-    dog_dict = DogApiDict.query.get(dict_id)
-    response = dict_schema.dump(dog_dict)
-    return jsonify(response)
+def get_dogdict(current_user_token, breed_name):
+    print('Calling GET')
+    query = DogApiDict.query.filter(DogApiDict.dict_breed_name==breed_name).first()
+    result = dict_schema.dump(query)
+    print(result["dict_breed_id"])
+    return jsonify(result["dict_breed_id"])
 
 @api.route('/dogdict/<dict_id>', methods = ['PUT'])
 @token_required
 def update_dog_dict(current_user_token, dict_id):
+    print('Calling PUT')
     dog_dict = DogApiDict.query.get(dict_id)
     dog_dict.dict_breed_name = request.json['dict_breed_name']
     dog_dict.dict_breed_id = request.json['dict_breed_id']

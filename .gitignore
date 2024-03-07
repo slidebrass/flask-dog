@@ -1,3 +1,4 @@
 .env
 dogvenv
 __pycache__
+config.py
