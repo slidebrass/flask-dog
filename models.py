@@ -129,6 +129,7 @@ class DogApiDict(db.Model):
     dict_id = db.Column(db.Integer, primary_key=True)
     dict_breed_name = db.Column(db.String)
     dict_breed_id = db.Column(db.Integer)
+    image_id = db.Column(db.String)
 
 class DictSchema(ma.SQLAlchemySchema):
     class Meta:
@@ -137,6 +138,7 @@ class DictSchema(ma.SQLAlchemySchema):
     dict_id = ma.auto_field()
     dict_breed_name = ma.auto_field()
     dict_breed_id = ma.auto_field()
+    image_id = ma.auto_field()
 
 dict_schema = DictSchema()
 dicts_schema = DictSchema(many=True)

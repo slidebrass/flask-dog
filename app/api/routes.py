@@ -196,6 +196,15 @@ def get_dogdict(current_user_token, breed_name):
     print(result["dict_breed_id"])
     return jsonify(result["dict_breed_id"])
 
+@api.route('/dogdict/<breed_name>', methods = ['GET'])
+@token_required
+def get_dogdict_image_id(current_user_token, breed_name):
+    print('Calling GET image_id')
+    query = DogApiDict.query.filter(DogApiDict.dict_breed_name==breed_name).first()
+    result = dict_schema.dump(query)
+    print(result["image_id"])
+    return jsonify(result["image_id"])
+
 @api.route('/dogdict/<dict_id>', methods = ['PUT'])
 @token_required
 def update_dog_dict(current_user_token, dict_id):
@@ -203,7 +212,7 @@ def update_dog_dict(current_user_token, dict_id):
     dog_dict = DogApiDict.query.get(dict_id)
     dog_dict.dict_breed_name = request.json['dict_breed_name']
     dog_dict.dict_breed_id = request.json['dict_breed_id']
-    dog_dict.user_token = current_user_token.token
+    dog_dict.iamge_id = request.json['image_id']
 
     db.session.commit()
     response = dict_schema.dump(dog_dict)
