@@ -3,6 +3,7 @@ from helpers import token_required
 from models import db, User, user_schema, users_schema, BreedNotes, breed_notes_schema
 from models import breeds_notes_schema, BreedInfo, breed_info_schema, breeds_info_schema
 from models import DogApiDict, dict_schema, dicts_schema
+from models import Auth0Profile, profile_schema, profiles_schema
 from sqlalchemy.sql import text
 
 api = Blueprint('api',__name__, url_prefix='/api')
@@ -61,17 +62,38 @@ def delete_user(token, id):
     response = user_schema.dump(user)
     return jsonify(response)
 
+# Auth0Profile Routes
+@api.route('/profiles', methods = ['POST'])
+@token_required
+# creating a profile for the user
+def create_profile(current_user_token):
+    auth_user = request.json['auth_user']
+    email = request.json['email']
+
+    profile = Auth0Profile(auth_user, email)
+
+    db.session.add(profile)
+    db.session.commit()
+
+    response = profile_schema.dump(profile)
+    return jsonify(response)
+
+# @api.route('/profiles', methods = ['GET'])
+# @token_required
+# retrieving profile information about the user
+# def get_profile(current_user_token, ):
+
+
 # Notes Routes
 @api.route('/notes', methods = ['POST'])
 @token_required
 # to create and save notes to a user's account
 def create_note(current_user_token):
     notes = request.json['notes']
-    id = request.json['id']
-    breed_info_id = request.json['breed_info_id']
-    user_token = current_user_token.token
+    image_id = request.json['image_id']
+    # user_token = current_user_token.token
 
-    breed_notes = BreedNotes(notes, id, breed_info_id, current_token = user_token)
+    breed_notes = BreedNotes(notes, image_id)
 
     db.session.add(breed_notes)
     db.session.commit()
@@ -88,19 +110,20 @@ def get_notes(current_user_token):
 
 @api.route('/notes/<breedNotes_Id>', methods = ['GET'])
 @token_required
-def get_note(current_user_token, breedNotes_Id):
+def get_note(breedNotes_Id):
     breed_note = BreedNotes.query.get(breedNotes_Id)
     response = breed_notes_schema.dump(breed_note)
     return jsonify(response)
 
 @api.route('/notes/<breedNotes_Id>', methods = ['PUT'])
 @token_required
-def update_notes(current_user_token, breedNotes_Id):
+def update_notes(breedNotes_Id):
     breed_notes = BreedNotes.query.get(breedNotes_Id)
     breed_notes.notes = request.json['notes']
+    breed_notes.image_id = request.json['image_id']
     breed_notes.id = request.json['id']
-    breed_notes.breed_info_id = request.json['breed_info_id']
-    breed_notes.user_token = current_user_token.token
+    
+    # breed_notes.user_token = current_user_token.token
 
     db.session.commit()
     response = breed_notes_schema.dump(breed_notes)
@@ -212,7 +235,6 @@ def update_dog_dict(current_user_token, dict_id):
     dog_dict = DogApiDict.query.get(dict_id)
     dog_dict.dict_breed_name = request.json['dict_breed_name']
     dog_dict.dict_breed_id = request.json['dict_breed_id']
-    dog_dict.iamge_id = request.json['image_id']
 
     db.session.commit()
     response = dict_schema.dump(dog_dict)

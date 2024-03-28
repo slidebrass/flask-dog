@@ -54,6 +54,26 @@ class UserSchema(ma.Schema):
 user_schema = UserSchema()
 users_schema = UserSchema(many=True)
 
+# Auth0User class established to store user_id
+# a_user is table-created primary_key; auth_user is Auth0-created user_id; email is data gathered by Auth0
+class Auth0Profile(db.Model):
+    __tablename__ = 'auth0user'
+    a_user = db.Column(db.Integer, primary_key=True)
+    auth_user = db.Column(db.Integer)
+    email = db.Column(db.String(50))
+
+    def __init__(self, a_user, auth_user, email):
+        self.a_user = a_user
+        self.auth_user = auth_user
+        self.email = email
+
+class ProfileSchema(ma.Schema):
+    class Meta:
+        fields = ['a_user', 'auth_user', 'email']
+
+profile_schema = ProfileSchema()
+profiles_schema = ProfileSchema(many=True)
+
 # creating a class to store breed information gathered from the Dog API
 class BreedInfo(db.Model):
     __tablename__ = 'breedinfo'
@@ -101,24 +121,24 @@ class BreedNotes(db.Model):
     __tablename__ = 'breednotes'
     breedNotes_Id = db.Column(db.String, primary_key=True)
     notes = db.Column(db.String(500))
+    image_id = db.Column(db.String)
     id = db.Column(db.String, db.ForeignKey('user.id'), nullable=False)
-    breed_info_id = db.Column(db.String, db.ForeignKey('breedinfo.breed_info_id'), nullable=False)
-    user_token = db.Column(db.String, db.ForeignKey('user.token'), nullable=False)
+    # user_token = db.Column(db.String, db.ForeignKey('user.token'), nullable=False)
 
     # setting unique id for breedNotes
-    def __init__(self, notes, id, breed_info_id, current_token, breedNotes_Id=''):
+    def __init__(self, notes, image_id, id, breedNotes_Id=''):
         self.breedNotes_Id = self.set_id()
         self.notes = notes
+        self.image_id = image_id
         self.id = id
-        self.breed_info_id = breed_info_id
-        self.user_token = current_token
+        # self.user_token = current_token
 
     def set_id(self):
         return str(uuid.uuid4())
         
 class BreedNotesSchema(ma.Schema):
     class Meta:
-        fields = ['breedNotes_Id', 'notes', 'id', 'breed_info_id']
+        fields = ['breedNotes_Id', 'notes', 'image_id', 'id']
 
 breed_notes_schema = BreedNotesSchema()
 breeds_notes_schema = BreedNotesSchema(many=True)
@@ -129,7 +149,7 @@ class DogApiDict(db.Model):
     dict_id = db.Column(db.Integer, primary_key=True)
     dict_breed_name = db.Column(db.String)
     dict_breed_id = db.Column(db.Integer)
-    image_id = db.Column(db.String)
+    
 
 class DictSchema(ma.SQLAlchemySchema):
     class Meta:
@@ -138,7 +158,6 @@ class DictSchema(ma.SQLAlchemySchema):
     dict_id = ma.auto_field()
     dict_breed_name = ma.auto_field()
     dict_breed_id = ma.auto_field()
-    image_id = ma.auto_field()
 
 dict_schema = DictSchema()
 dicts_schema = DictSchema(many=True)
