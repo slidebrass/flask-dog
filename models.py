@@ -122,15 +122,15 @@ class BreedNotes(db.Model):
     breedNotes_Id = db.Column(db.String, primary_key=True)
     notes = db.Column(db.String(500))
     image_id = db.Column(db.String)
-    id = db.Column(db.String, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.String)
     # user_token = db.Column(db.String, db.ForeignKey('user.token'), nullable=False)
 
     # setting unique id for breedNotes
-    def __init__(self, notes, image_id, id, breedNotes_Id=''):
+    def __init__(self, notes, image_id, user_id, breedNotes_Id=''):
         self.breedNotes_Id = self.set_id()
         self.notes = notes
         self.image_id = image_id
-        self.id = id
+        self.user_id = user_id
         # self.user_token = current_token
 
     def set_id(self):
@@ -138,7 +138,7 @@ class BreedNotes(db.Model):
         
 class BreedNotesSchema(ma.Schema):
     class Meta:
-        fields = ['breedNotes_Id', 'notes', 'image_id', 'id']
+        fields = ['breedNotes_Id', 'notes', 'image_id', 'user_id']
 
 breed_notes_schema = BreedNotesSchema()
 breeds_notes_schema = BreedNotesSchema(many=True)

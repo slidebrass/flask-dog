@@ -78,11 +78,13 @@ def create_profile(current_user_token):
     response = profile_schema.dump(profile)
     return jsonify(response)
 
-# @api.route('/profiles', methods = ['GET'])
-# @token_required
+@api.route('/profiles', methods = ['GET'])
+@token_required
 # retrieving profile information about the user
-# def get_profile(current_user_token, ):
-
+def get_profile(current_user_token, user_id):
+    query = Auth0Profile.query.filter(Auth0Profile.auth_user==user_id).first()
+    result = profile_schema.dump(query)
+    return jsonify(result)
 
 # Notes Routes
 @api.route('/notes', methods = ['POST'])
