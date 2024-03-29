@@ -93,9 +93,10 @@ def get_profile(current_user_token, user_id):
 def create_note(current_user_token):
     notes = request.json['notes']
     image_id = request.json['image_id']
+    user_id = request.json['user_id']
     # user_token = current_user_token.token
 
-    breed_notes = BreedNotes(notes, image_id)
+    breed_notes = BreedNotes(notes, image_id, user_id)
 
     db.session.add(breed_notes)
     db.session.commit()
@@ -103,10 +104,10 @@ def create_note(current_user_token):
     response = breed_notes_schema.dump(breed_notes)
     return jsonify(response)
 
-@api.route('/notes', methods = ['GET'])
-@token_required
-def get_notes(current_user_token):
-    breed_notes = BreedNotes.query.filter_by(user_token = current_user_token.token).all()
+@api.route('/notes/all/<user_id>', methods = ['GET'])
+# @token_required
+def get_notes(user_id):
+    breed_notes = BreedNotes.query.filter_by(user_id = user_id).all()
     response = breeds_notes_schema.dump(breed_notes)
     return jsonify(response)
 

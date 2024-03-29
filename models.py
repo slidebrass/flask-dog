@@ -59,7 +59,7 @@ users_schema = UserSchema(many=True)
 class Auth0Profile(db.Model):
     __tablename__ = 'auth0user'
     a_user = db.Column(db.Integer, primary_key=True)
-    auth_user = db.Column(db.Integer)
+    auth_user = db.Column(db.String)
     email = db.Column(db.String(50))
 
     def __init__(self, a_user, auth_user, email):
