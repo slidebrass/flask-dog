@@ -120,11 +120,11 @@ def get_note(breedNotes_Id):
 
 @api.route('/notes/<breedNotes_Id>', methods = ['PUT'])
 @token_required
-def update_notes(breedNotes_Id):
+def update_note(breedNotes_Id):
     breed_notes = BreedNotes.query.get(breedNotes_Id)
     breed_notes.notes = request.json['notes']
-    breed_notes.image_id = request.json['image_id']
-    breed_notes.id = request.json['id']
+    # breed_notes.image_id = request.json['image_id']
+    # breed_notes.id = request.json['id']
     
     # breed_notes.user_token = current_user_token.token
 
