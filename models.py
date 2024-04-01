@@ -7,8 +7,9 @@ from flask_marshmallow import Marshmallow
 import secrets
 
 login_manager = LoginManager()
-ma = Marshmallow()
 db = SQLAlchemy()
+ma = Marshmallow()
+
 
 @login_manager.user_loader
 def load_user(user_id):

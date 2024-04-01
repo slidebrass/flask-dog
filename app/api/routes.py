@@ -1,10 +1,9 @@
-from flask import Blueprint, request, jsonify, render_template
+from flask import Blueprint, request, jsonify
 from helpers import token_required
 from models import db, User, user_schema, users_schema, BreedNotes, breed_notes_schema
 from models import breeds_notes_schema, BreedInfo, breed_info_schema, breeds_info_schema
 from models import DogApiDict, dict_schema, dicts_schema
-from models import Auth0Profile, profile_schema, profiles_schema
-from sqlalchemy.sql import text
+from models import Auth0Profile, profile_schema
 
 api = Blueprint('api',__name__, url_prefix='/api')
 
